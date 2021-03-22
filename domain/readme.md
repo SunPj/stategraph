@@ -2,7 +2,14 @@
 
 There are multiple implementations we can go with
 
-### 1. Fire and forget 
+### 0. Non parallel execution
+1. Every event is pushed to a priority queue where we have events with smaller timestamp value on the top
+2. Pop next event from the queue and apply changes to the component by id and recursively propagate the state change
+3. Recursion completes when graph stabilizes (in out case there won't be any deadlocks due to cycles)
+4. Move to next event 
+5. Use tail recursion or Fiber to translate recursion to a cycle to keep the stack safe  
+
+### 1. Fire and forget [Parallel graph] 
 The assumption is that we allow events to be processed in parallel without any graph locking. 
 
 Good for when we have a big graph of components and enormous number of events coming simultaneously and don't worry about intermediate results
@@ -22,7 +29,7 @@ Say component might receive Error state from one dependency earlier than Warning
 we trigger sending Error and Warning email reports then client may receive Error first and then Warning and ignore this thinking that
 system has been recovered by its own. 
 
-### 2. Processing events one a time
+### 2. Processing events one a time [Parallel graph]
 The idea is that we wait for the graph to stabilize before picking up the next event from the queue. 
 
 Good for when we have non frequent events. Events are processed one after another and there won't be any intermediate incorrect states of the entire tree  
@@ -40,7 +47,7 @@ Events are processed one after another and there won't be any intermediate incor
 Low performance (because of having having to wait till event propagates across the whole graph)
 
  
-### 3. Selectively lock the sub graph 
+### 3. Selectively lock the sub graph [Parallel graph]
 The idea is that we calculate the possible path of propagation the event and lock that sub graph. 
 
 Doing that we make it possible to process multiple events at a time if their paths are not intersect. 
@@ -58,5 +65,14 @@ In that case the whole graph will be locked.
 Low performance for tight coupled graph, implementation is not so straightforward
 
 ### To sum it up
-
 Taking into account that I have no specific restrictions I am implementing the simplest version that cover the needs described in assignment 
+
+### Questions
+1. To understand the better solution I need to know the proportion of number of nodes to number of events
+If number of nodes is big than we should focus on parrallelzing propogation of the event 
+If the number of events is big then we should focus on parrallelzing 
+
+1. How to deal with dead connections when component is re uploaded? 
+Say it used to have A and B dependants and now only B and C
+
+2. Whether we need to return an error messages to caller when event sent to non existing component? 
