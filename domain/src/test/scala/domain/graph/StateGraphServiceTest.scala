@@ -1,7 +1,7 @@
+package domain.graph
+
 import org.scalatest.freespec.AsyncFreeSpec
 import org.scalatest.matchers.should.Matchers
-
-import scala.concurrent.ExecutionContext
 
 abstract class StateGraphServiceTest() extends AsyncFreeSpec with Matchers {
 

@@ -1,3 +1,5 @@
+package domain.graph
+
 import scala.concurrent.Future
 import scala.language.higherKinds
 
