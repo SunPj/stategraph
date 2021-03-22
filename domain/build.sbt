@@ -1,7 +1,7 @@
 
 name := "domain"
 
-val AkkaVersion = "2.6.13"
+val AkkaVersion = "2.6.10"
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
